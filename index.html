@@ -10,7 +10,7 @@ body{
     margin:0;
     font-family:Arial, sans-serif;
     text-align:center;
-    background:linear-gradient(135deg,#1e3c72,#2a5298);
+    background:linear-gradient(135deg,#141e30,#243b55);
     color:white;
 }
 
@@ -26,36 +26,36 @@ button{
     padding:10px 20px;
     margin:5px;
     border:none;
-    border-radius:8px;
+    border-radius:10px;
     cursor:pointer;
     font-size:16px;
+    background:#00c6ff;
+    transition:0.2s;
 }
 
-.mode-btn{
-    background:#00c3ff;
-}
-
-.mode-btn:hover{
+button:hover{
     background:#0099cc;
+    transform:scale(1.05);
 }
 
 #clickArea{
     width:300px;
     height:300px;
     background:#ff4757;
-    margin:30px auto;
+    margin:40px auto;
     display:flex;
     align-items:center;
     justify-content:center;
-    font-size:24px;
-    border-radius:20px;
+    font-size:28px;
+    border-radius:50%;
     cursor:pointer;
     user-select:none;
     transition:0.1s;
+    box-shadow:0 0 40px rgba(255,71,87,0.6);
 }
 
 #clickArea:active{
-    transform:scale(0.95);
+    transform:scale(0.9);
 }
 
 .stats{
@@ -69,10 +69,10 @@ button{
 <h1>CPS Test Oyunu</h1>
 
 <div class="menu">
-    <button class="mode-btn" onclick="setMode(0)">Normal</button>
-    <button class="mode-btn" onclick="setMode(1)">1 Saniye</button>
-    <button class="mode-btn" onclick="setMode(5)">5 Saniye</button>
-    <button class="mode-btn" onclick="setMode(10)">10 Saniye</button>
+    <button onclick="setMode(0)">Normal</button>
+    <button onclick="setMode(1)">1 Saniye</button>
+    <button onclick="setMode(5)">5 Saniye</button>
+    <button onclick="setMode(10)">10 Saniye</button>
 </div>
 
 <div id="clickArea">TIKLA!</div>
@@ -90,6 +90,7 @@ let timeLeft = 0;
 let timer = null;
 let modeTime = 0;
 let bestScore = 0;
+let gameActive = false;
 
 const clickArea = document.getElementById("clickArea");
 
@@ -101,30 +102,35 @@ function setMode(seconds){
 }
 
 function startTimer(){
+    gameActive = true;
     timer = setInterval(()=>{
         timeLeft--;
         document.getElementById("timeLeft").textContent = timeLeft;
 
         if(timeLeft <= 0){
             clearInterval(timer);
-            calculateCPS();
+            gameActive = false;
+            finishGame();
         }
     },1000);
 }
 
-function calculateCPS(){
-    let cps = (clickCount / modeTime).toFixed(2);
-    document.getElementById("cps").textContent = cps;
+function finishGame(){
+    if(modeTime > 0){
+        let cps = (clickCount / modeTime).toFixed(2);
+        document.getElementById("cps").textContent = cps;
 
-    if(cps > bestScore){
-        bestScore = cps;
-        document.getElementById("best").textContent = bestScore;
+        if(Number(cps) > bestScore){
+            bestScore = cps;
+            document.getElementById("best").textContent = bestScore;
+        }
     }
 }
 
 function resetGame(){
     clickCount = 0;
     clearInterval(timer);
+    gameActive = false;
     document.getElementById("clickCount").textContent = 0;
     document.getElementById("cps").textContent = 0;
     document.getElementById("timeLeft").textContent = 0;
@@ -138,11 +144,11 @@ clickArea.addEventListener("click", ()=>{
         return;
     }
 
-    if(timeLeft === modeTime){
+    if(!gameActive && timeLeft === modeTime){
         startTimer();
     }
 
-    if(timeLeft > 0){
+    if(gameActive){
         clickCount++;
         document.getElementById("clickCount").textContent = clickCount;
     }
